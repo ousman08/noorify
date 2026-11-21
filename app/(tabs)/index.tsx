@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState, type ComponentProps } from 'react';
+import { useFocusEffect, useRouter, type Href } from 'expo-router';
+import { useCallback, useState, type ComponentProps } from 'react';
 import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import AvisoProvisional from '@/components/AvisoProvisional';
 import { colors, radius, spacing } from '@/constants/theme';
+import { cargarSesiones, formatearFecha, type SesionDhikr } from '@/lib/dhikrSessions';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
 
@@ -42,9 +44,30 @@ const ESTADOS_DEL_CORAZON: { etiqueta: string; icono: IconName }[] = [
 ];
 
 export default function Inicio() {
+  const router = useRouter();
   const [reflexionSalah, setReflexionSalah] = useState(false);
   const [corazon, setCorazon] = useState<string | null>(null);
   const [aviso, setAviso] = useState<Aviso | null>(null);
+  const [sesiones, setSesiones] = useState<SesionDhikr[]>([]);
+
+  // Al volver a Inicio se relee el almacenamiento local.
+  useFocusEffect(
+    useCallback(() => {
+      let montado = true;
+
+      cargarSesiones()
+        .then((datos) => {
+          if (montado) setSesiones(datos);
+        })
+        .catch(() => {
+          if (montado) setSesiones([]);
+        });
+
+      return () => {
+        montado = false;
+      };
+    }, []),
+  );
 
   const mostrarAviso = (titulo: string, mensaje: string) => {
     setAviso({ titulo, mensaje });
@@ -73,13 +96,8 @@ export default function Inicio() {
         <View style={styles.filaBotones}>
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Empezar"
-            onPress={() =>
-              mostrarAviso(
-                'Sesión de dhikr',
-                'Aquí empezará la sesión: iniciar, pausar y finalizar. Todavía no guarda nada.',
-              )
-            }
+            accessibilityLabel="Empezar una sesión de dhikr"
+            onPress={() => router.push('/sesion-dhikr' as Href)}
             style={({ pressed }) => [styles.botonPrimario, pressed && styles.botonPrimarioPulsado]}>
             <Text style={styles.botonPrimarioTexto}>Empezar</Text>
           </Pressable>
@@ -226,8 +244,29 @@ export default function Inicio() {
           </View>
         </View>
 
+        {/* Constancia guardada */}
+        <View style={styles.tarjeta}>
+          <View style={styles.filaEntre}>
+            <Text style={styles.tarjetaTitulo}>Tu constancia</Text>
+            <Ionicons name="leaf-outline" size={18} color={colors.inactive} />
+          </View>
+          {sesiones.length === 0 ? (
+            <Text style={styles.tarjetaTexto}>
+              Aún no hay sesiones guardadas. Cuando termines una, aparecerá aquí.
+            </Text>
+          ) : (
+            <Text style={styles.tarjetaTexto}>
+              {sesiones.length === 1
+                ? '1 sesión guardada'
+                : `${sesiones.length} sesiones guardadas`}{' '}
+              · última: {formatearFecha(sesiones[0].finalizadaEn)}
+            </Text>
+          )}
+        </View>
+
         <Text style={styles.pie}>
-          Esta entrega es un prototipo navegable. Nada de lo que ves aquí se guarda todavía.
+          Las sesiones de dhikr se guardan solo en tu teléfono. El resto de la pantalla sigue
+          siendo provisional.
         </Text>
       </ScrollView>
 

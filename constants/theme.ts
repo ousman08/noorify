@@ -21,6 +21,9 @@ export const colors = {
 
   example: '#8A6D3B',
   exampleBg: '#FBF3E2',
+
+  error: '#A6534A',
+  errorBg: '#F9ECE9',
 } as const;
 
 export const radius = {
