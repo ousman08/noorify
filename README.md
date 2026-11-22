@@ -1,39 +1,44 @@
-
 # Noorify
 
-Aplicación móvil diseñada para acompañar hábitos islámicos diarios con calma, constancia y sin presión.
+Aplicación móvil para acompañar el recuerdo de Allah (dhikr) en el día a día, con calma, constancia y sin presión.
 
 ## Filosofía
-- **Constancia sin culpa:** Sin rachas punitivas, sin alarmas agresivas ni comparaciones.
-- **Privacidad primero:** Los datos y registros se almacenan localmente en el dispositivo del usuario.
-- **Diseño sereno:** Interfaz limpia, espaciada y pensada para la concentración.
 
-## Stack Tecnológico
-- **Framework:** React Native + Expo (SDK 58)
-- **Enrutado:** Expo Router
-- **Lenguaje:** TypeScript
-- **Almacenamiento local:** AsyncStorage
-- **Testing:** Jest + React Native Testing Library
-- **Gestor de paquetes:** pnpm
+- **Constancia sin culpa:** sin rachas punitivas, sin alarmas agresivas ni comparaciones.
+- **Privacidad primero:** los datos y registros se almacenan localmente en el dispositivo.
+- **Diseño sereno:** interfaz limpia, espaciada y pensada para la concentración.
 
-## Estructura del proyecto
-```text
-app/              # Pantallas y navegación (Expo Router)
-components/       # Componentes reutilizables de interfaz
-constants/        # Paleta de colores, espaciados y tema visual
-lib/              # Lógica de negocio y persistencia local
-__tests__/        # Pruebas unitarias y de componentes
+## Stack
+
+- React Native + Expo (SDK 58)
+- Expo Router
+- TypeScript
+- AsyncStorage (almacenamiento local)
+- pnpm
+
+## Estructura
+
+```
+app/          Pantallas y navegación (Expo Router)
+components/   Componentes reutilizables
+constants/    Colores, espaciados y tema visual
+lib/          Lógica y persistencia local
+assets/       Recursos estáticos
+docs/         Documentación
 ```
 
-## Ejecución en local
+## Ejecutar en local
+
 ```bash
-# Instalar dependencias
 pnpm install
-
-# Arrancar servidor de desarrollo (Expo Go)
 pnpm expo start
-
-# Ejecutar pruebas y verificación de tipos
-pnpm test
 pnpm tsc --noEmit
 ```
+
+## Estado
+
+Proyecto en desarrollo. Las pruebas (Jest + React Native Testing Library) están escritas y se publicarán próximamente.
+
+## Licencia
+
+MIT
