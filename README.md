@@ -1,4 +1,4 @@
-cd ~/proyectos/noorify && cat << 'EOF' > README.md
+
 # Noorify
 
 Aplicación móvil diseñada para acompañar hábitos islámicos diarios con calma, constancia y sin presión.
