@@ -1,0 +1,8 @@
+# Configuración de pnpm 11 para este proyecto.
+# eas-cli trae dos dependencias con scripts de instalación que no necesitamos:
+# - dtrace-provider: solo compila soporte DTrace en macOS/illumos.
+# - protobufjs: su script únicamente imprime un aviso.
+# Al declararlas como "false" evitamos que pnpm aborte la instalación.
+allowBuilds:
+  dtrace-provider: false
+  protobufjs: false
