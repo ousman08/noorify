@@ -11,27 +11,36 @@ import {
   formatearFecha,
   type SesionDhikr,
 } from '@/lib/dhikrSessions';
+import {
+  ETIQUETAS_SENTIMIENTO,
+  cargarReflexiones,
+  formatearFechaCorta,
+  type ReflexionSalah,
+} from '@/lib/salahReflection';
 
 export default function Progreso() {
   const [sesiones, setSesiones] = useState<SesionDhikr[]>([]);
+  const [reflexiones, setReflexiones] = useState<ReflexionSalah[]>([]);
   const [cargando, setCargando] = useState(true);
 
   useFocusEffect(
     useCallback(() => {
       let montado = true;
 
-      cargarSesiones()
-        .then((datos) => {
-          if (montado) {
-            setSesiones(datos);
-            setCargando(false);
-          }
+      Promise.all([cargarSesiones(), cargarReflexiones()])
+        .then(([datosSesiones, mapaReflexiones]) => {
+          if (!montado) return;
+          setSesiones(datosSesiones);
+          setReflexiones(
+            Object.values(mapaReflexiones).sort((a, b) => b.fecha.localeCompare(a.fecha)),
+          );
+          setCargando(false);
         })
         .catch(() => {
-          if (montado) {
-            setSesiones([]);
-            setCargando(false);
-          }
+          if (!montado) return;
+          setSesiones([]);
+          setReflexiones([]);
+          setCargando(false);
         });
 
       return () => {
@@ -42,6 +51,7 @@ export default function Progreso() {
 
   const totalSegundos = sesiones.reduce((suma, sesion) => suma + sesion.duracionActivaSegundos, 0);
   const ultimas = sesiones.slice(0, 5);
+  const ultimasReflexiones = reflexiones.slice(0, 3);
 
   return (
     <SafeAreaView style={styles.pantalla} edges={['top']}>
@@ -103,14 +113,53 @@ export default function Progreso() {
           )}
         </View>
 
+        <View style={styles.seccion}>
+          <Text style={styles.seccionTitulo}>Reflexión de Salah</Text>
+
+          {reflexiones.length === 0 ? (
+            <View style={styles.tarjeta}>
+              <Text style={styles.tarjetaTexto}>
+                Todavía no hay reflexiones guardadas. Puedes anotar tu día desde Inicio, sin prisa.
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.lista}>
+              {ultimasReflexiones.map((reflexion, indice) => (
+                <View
+                  key={reflexion.fecha}
+                  style={[styles.filaSesion, indice > 0 && styles.filaSesionBorde]}>
+                  <View style={styles.iconoSesion}>
+                    <Ionicons name="moon-outline" size={18} color={colors.primary} />
+                  </View>
+                  <View style={styles.sesionTexto}>
+                    <Text style={styles.sesionFecha}>{formatearFechaCorta(reflexion.fecha)}</Text>
+                    <Text style={styles.sesionDetalle}>
+                      {reflexion.sentimiento
+                        ? ETIQUETAS_SENTIMIENTO[reflexion.sentimiento]
+                        : 'Sin sentimiento anotado'}
+                    </Text>
+                  </View>
+                </View>
+              ))}
+              <View style={[styles.filaSesion, styles.filaSesionBorde]}>
+                <Text style={styles.sesionDetalle}>
+                  {reflexiones.length === 1
+                    ? '1 día anotado en total'
+                    : `${reflexiones.length} días anotados en total`}
+                </Text>
+              </View>
+            </View>
+          )}
+        </View>
+
         <View style={styles.tarjeta}>
           <View style={styles.aviso}>
             <Ionicons name="construct-outline" size={16} color={colors.example} />
             <Text style={styles.avisoTexto}>Pantalla en construcción</Text>
           </View>
           <Text style={styles.tarjetaTexto}>
-            Más adelante verás aquí tus días de constancia, la lectura del Corán y la reflexión de
-            Salah. Sin rachas que castiguen ni comparaciones.
+            Más adelante verás aquí tus días de constancia y la lectura del Corán. Sin rachas que
+            castiguen ni comparaciones.
           </Text>
         </View>
 

@@ -53,6 +53,10 @@ function RootLayoutNav() {
           name="sesion-dhikr"
           options={{ presentation: 'modal', headerShown: false }}
         />
+        <Stack.Screen
+          name="reflexion-salah"
+          options={{ presentation: 'modal', headerShown: false }}
+        />
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
       </Stack>
     </ThemeProvider>

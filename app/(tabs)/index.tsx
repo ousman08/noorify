@@ -7,6 +7,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import AvisoProvisional from '@/components/AvisoProvisional';
 import { colors, radius, spacing } from '@/constants/theme';
 import { cargarSesiones, formatearFecha, type SesionDhikr } from '@/lib/dhikrSessions';
+import {
+  cargarPreferenciaSalah,
+  cargarReflexiones,
+  claveDeHoy,
+  guardarPreferenciaSalah,
+  type ReflexionSalah,
+} from '@/lib/salahReflection';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
 
@@ -45,7 +52,8 @@ const ESTADOS_DEL_CORAZON: { etiqueta: string; icono: IconName }[] = [
 
 export default function Inicio() {
   const router = useRouter();
-  const [reflexionSalah, setReflexionSalah] = useState(false);
+  const [salahActiva, setSalahActiva] = useState(false);
+  const [reflexionHoy, setReflexionHoy] = useState<ReflexionSalah | null>(null);
   const [corazon, setCorazon] = useState<string | null>(null);
   const [aviso, setAviso] = useState<Aviso | null>(null);
   const [sesiones, setSesiones] = useState<SesionDhikr[]>([]);
@@ -55,12 +63,17 @@ export default function Inicio() {
     useCallback(() => {
       let montado = true;
 
-      cargarSesiones()
-        .then((datos) => {
-          if (montado) setSesiones(datos);
+      Promise.all([cargarSesiones(), cargarPreferenciaSalah(), cargarReflexiones()])
+        .then(([datosSesiones, preferencia, reflexiones]) => {
+          if (!montado) return;
+          setSesiones(datosSesiones);
+          setSalahActiva(preferencia);
+          setReflexionHoy(reflexiones[claveDeHoy()] ?? null);
         })
         .catch(() => {
-          if (montado) setSesiones([]);
+          if (!montado) return;
+          setSesiones([]);
+          setReflexionHoy(null);
         });
 
       return () => {
@@ -68,6 +81,13 @@ export default function Inicio() {
       };
     }, []),
   );
+
+  const alternarSalah = (valor: boolean) => {
+    setSalahActiva(valor);
+    void guardarPreferenciaSalah(valor).catch(() => {
+      // Si falla el guardado de la preferencia, no interrumpimos al usuario.
+    });
+  };
 
   const mostrarAviso = (titulo: string, mensaje: string) => {
     setAviso({ titulo, mensaje });
@@ -122,25 +142,43 @@ export default function Inicio() {
             <View style={styles.textoFlexible}>
               <Text style={styles.tarjetaTitulo}>Reflexión de Salah</Text>
               <Text style={styles.tarjetaTexto}>
-                Un recordatorio suave para revisar tu salah, sin juicios.
+                Un espacio tranquilo para revisar tu salah, sin juicios.
               </Text>
             </View>
             <Switch
-              accessibilityLabel="Activar reflexión de Salah"
-              value={reflexionSalah}
-              onValueChange={(valor) => {
-                setReflexionSalah(valor);
-                mostrarAviso(
-                  'Reflexión de Salah',
-                  'El interruptor solo funciona en esta pantalla. No se guarda al cerrar la app.',
-                );
-              }}
+              accessibilityLabel="Mostrar la reflexión del día en Inicio"
+              value={salahActiva}
+              onValueChange={alternarSalah}
               trackColor={{ false: colors.border, true: colors.primarySoft }}
-              thumbColor={reflexionSalah ? colors.primary : colors.surface}
+              thumbColor={salahActiva ? colors.primary : colors.surface}
               ios_backgroundColor={colors.border}
             />
           </View>
-          <Text style={styles.nota}>Solo en esta pantalla · no se guarda.</Text>
+
+          <Text style={styles.nota}>
+            {salahActiva
+              ? 'Mostrando el estado del día en Inicio · guardado en tu teléfono.'
+              : 'Mostrar en Inicio · la reflexión sigue disponible aunque esté apagado.'}
+          </Text>
+
+          {salahActiva ? (
+            <Text style={styles.estadoSalah}>
+              {reflexionHoy
+                ? 'Reflexión de hoy guardada. Puedes cambiarla cuando quieras.'
+                : 'Aún sin reflexión hoy. No hay prisa.'}
+            </Text>
+          ) : null}
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Abrir la reflexión de Salah"
+            onPress={() => router.push('/reflexion-salah' as Href)}
+            style={({ pressed }) => [styles.botonEnlace, pressed && styles.pulsado]}>
+            <Ionicons name="chevron-forward" size={16} color={colors.primary} />
+            <Text style={styles.botonEnlaceTexto}>
+              {reflexionHoy ? 'Revisar mi reflexión' : 'Empezar mi reflexión'}
+            </Text>
+          </Pressable>
         </View>
 
         {/* Momento del día */}
@@ -265,8 +303,8 @@ export default function Inicio() {
         </View>
 
         <Text style={styles.pie}>
-          Las sesiones de dhikr se guardan solo en tu teléfono. El resto de la pantalla sigue
-          siendo provisional.
+          El dhikr y la reflexión de Salah se guardan solo en tu teléfono. El resto de la pantalla
+          sigue siendo provisional.
         </Text>
       </ScrollView>
 
@@ -403,6 +441,28 @@ const styles = StyleSheet.create({
   nota: {
     fontSize: 13,
     color: colors.inactive,
+  },
+  estadoSalah: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: colors.text,
+  },
+  botonEnlace: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: spacing.xs,
+    marginTop: spacing.xs,
+    backgroundColor: colors.surfaceAlt,
+    borderRadius: radius.button,
+    borderWidth: 1,
+    borderColor: colors.borderStrong,
+    paddingVertical: spacing.md,
+  },
+  botonEnlaceTexto: {
+    color: colors.primary,
+    fontSize: 15,
+    fontWeight: '600',
   },
   pulsado: {
     opacity: 0.7,
