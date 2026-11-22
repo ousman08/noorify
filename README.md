@@ -37,4 +37,3 @@ pnpm expo start
 pnpm test
 pnpm tsc --noEmit
 ```
-EOF
