@@ -153,12 +153,16 @@ export default function SesionDhikr() {
   useEffect(() => {
     const suscripcion = BackHandler.addEventListener('hardwareBackPress', () => {
       if (guardada !== null) return false;
-      if (!sesionLista) return true;
+      if (!sesionLista || guardando || confirmarSalida) return true;
+      if (confirmarFinal) {
+        setConfirmarFinal(false);
+        return true;
+      }
       setConfirmarSalida(true);
       return true;
     });
     return () => suscripcion.remove();
-  }, [sesionLista, guardada]);
+  }, [sesionLista, guardada, guardando, confirmarSalida, confirmarFinal]);
 
 
   const pausar = () => {
@@ -355,7 +359,7 @@ export default function SesionDhikr() {
         enLinea
         onClose={() => {}}
         titulo="Hay una sesión sin terminar"
-        mensaje="Puedes continuar donde lo dejaste o empezar una sesión nueva."
+        mensaje={error ?? "Puedes continuar donde lo dejaste o empezar una sesión nueva."}
         etiquetaPrincipal="Continuar sesión"
         onPrincipal={continuarBorrador}
         accionSecundaria={{ etiqueta: 'Empezar de cero', onPress: () => void empezarDeCero() }}
