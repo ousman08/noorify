@@ -57,6 +57,7 @@ function RootLayoutNav() {
           name="reflexion-salah"
           options={{ presentation: 'modal', headerShown: false }}
         />
+        <Stack.Screen name="curso" options={{ headerShown: false }} />
         <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
       </Stack>
     </ThemeProvider>
