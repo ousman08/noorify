@@ -117,3 +117,78 @@ export function formatearFecha(iso: string): string {
 
   return `${fecha.getDate()} ${MESES[fecha.getMonth()]}, ${hora}`;
 }
+
+
+/** Borrador temporal de una sesión todavía no finalizada. */
+export const CLAVE_BORRADOR = 'noorify:dhikr:draft:v1';
+const ANTIGUEDAD_MAXIMA_BORRADOR_MS = 24 * 60 * 60 * 1000;
+
+export type BorradorDhikr = {
+  version: 1;
+  startedAtMs: number;
+  activeMs: number;
+  activeSinceMs: number | null;
+  toques: number;
+  updatedAtMs: number;
+};
+
+function esNumeroFinito(valor: unknown): valor is number {
+  return typeof valor === 'number' && Number.isFinite(valor);
+}
+
+function esBorrador(valor: unknown, ahora: number): valor is BorradorDhikr {
+  if (typeof valor !== 'object' || valor === null) return false;
+  const borrador = valor as Record<string, unknown>;
+  if (
+    borrador.version !== 1 ||
+    !esNumeroFinito(borrador.startedAtMs) ||
+    !esNumeroFinito(borrador.activeMs) ||
+    !esNumeroFinito(borrador.updatedAtMs) ||
+    !Number.isInteger(borrador.toques) ||
+    (borrador.toques as number) < 0 ||
+    (borrador.toques as number) > 1_000_000
+  ) return false;
+
+  const inicio = borrador.startedAtMs;
+  const actualizado = borrador.updatedAtMs;
+  const activo = borrador.activeMs;
+  if (
+    inicio > ahora + 60_000 ||
+    actualizado > ahora + 60_000 ||
+    actualizado < inicio ||
+    ahora - actualizado > ANTIGUEDAD_MAXIMA_BORRADOR_MS ||
+    activo < 0 ||
+    activo > ahora - inicio + 60_000
+  ) return false;
+
+  return borrador.activeSinceMs === null ||
+    (esNumeroFinito(borrador.activeSinceMs) &&
+      borrador.activeSinceMs >= inicio &&
+      borrador.activeSinceMs <= ahora + 60_000);
+}
+
+export async function cargarBorrador(): Promise<BorradorDhikr | null> {
+  try {
+    const bruto = await AsyncStorage.getItem(CLAVE_BORRADOR);
+    if (!bruto) return null;
+    const datos: unknown = JSON.parse(bruto);
+    if (esBorrador(datos, Date.now())) return datos;
+    await AsyncStorage.removeItem(CLAVE_BORRADOR);
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export async function guardarBorrador(borrador: BorradorDhikr): Promise<void> {
+  await AsyncStorage.setItem(CLAVE_BORRADOR, JSON.stringify(borrador));
+}
+
+export async function borrarBorrador(): Promise<boolean> {
+  try {
+    await AsyncStorage.removeItem(CLAVE_BORRADOR);
+    return true;
+  } catch {
+    return false;
+  }
+}
