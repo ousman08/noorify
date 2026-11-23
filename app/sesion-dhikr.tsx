@@ -115,10 +115,31 @@ export default function SesionDhikr() {
       });
     }, 1000);
     return () => clearTimeout(temporizador);
-  }, [sesionLista, borradorPendiente, guardada, guardando, estado, acumuladoMs, inicioTramo, iniciadaEn, toques, guardarBorradorActual]);
+  }, [
+    sesionLista,
+    borradorPendiente,
+    guardada,
+    guardando,
+    estado,
+    acumuladoMs,
+    inicioTramo,
+    iniciadaEn,
+    toques,
+    guardarBorradorActual,
+  ]);
 
   useEffect(() => {
-    if (!sesionLista || borradorPendiente !== null || guardada !== null) return;
+    if (!sesionLista || borradorPendiente !== null || guardada !== null || guardando) return;
+    const intervalo = setInterval(() => {
+      void guardarBorradorActual().catch(() => {
+        setError('No se pudo guardar el borrador en el teléfono.');
+      });
+    }, 1000);
+    return () => clearInterval(intervalo);
+  }, [sesionLista, borradorPendiente, guardada, guardando, guardarBorradorActual]);
+
+  useEffect(() => {
+    if (!sesionLista || borradorPendiente !== null || guardada !== null || guardando) return;
     const suscripcion = AppState.addEventListener('change', (siguienteEstado) => {
       if (siguienteEstado === 'background' || siguienteEstado === 'inactive') {
         void guardarBorradorActual().catch(() => {
@@ -127,7 +148,7 @@ export default function SesionDhikr() {
       }
     });
     return () => suscripcion.remove();
-  }, [sesionLista, borradorPendiente, guardada, estado, acumuladoMs, inicioTramo, iniciadaEn, toques]);
+  }, [sesionLista, borradorPendiente, guardada, guardando, guardarBorradorActual]);
 
   useEffect(() => {
     const suscripcion = BackHandler.addEventListener('hardwareBackPress', () => {
