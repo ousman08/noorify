@@ -1,4 +1,4 @@
-# Noorify
+# Asas
 
 App móvil para acompañar el recuerdo de Allah con calma y constancia. Expo / React Native. Prioriza patrones mobile-first, rendimiento y compatibilidad entre plataformas.
 
