@@ -5,6 +5,7 @@ import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-nat
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { colors, radius, spacing } from '@/constants/theme';
+import { cargarSesiones, formatearFecha, type SesionDhikr } from '@/lib/dhikrSessions';
 import {
   cargarPreferenciaSalah,
   cargarReflexiones,
@@ -17,19 +18,22 @@ export default function Inicio() {
   const router = useRouter();
   const [salahActiva, setSalahActiva] = useState(false);
   const [reflexionHoy, setReflexionHoy] = useState<ReflexionSalah | null>(null);
+  const [sesiones, setSesiones] = useState<SesionDhikr[]>([]);
 
   useFocusEffect(
     useCallback(() => {
       let montado = true;
 
-      Promise.all([cargarPreferenciaSalah(), cargarReflexiones()])
-        .then(([preferencia, reflexiones]) => {
+      Promise.all([cargarSesiones(), cargarPreferenciaSalah(), cargarReflexiones()])
+        .then(([datosSesiones, preferencia, reflexiones]) => {
           if (!montado) return;
+          setSesiones(datosSesiones);
           setSalahActiva(preferencia);
           setReflexionHoy(reflexiones[claveDeHoy()] ?? null);
         })
         .catch(() => {
           if (!montado) return;
+          setSesiones([]);
           setReflexionHoy(null);
         });
 
@@ -121,6 +125,25 @@ export default function Inicio() {
               {reflexionHoy ? 'Revisar mi reflexión' : 'Empezar mi reflexión'}
             </Text>
           </Pressable>
+        </View>
+
+        <View style={styles.tarjeta}>
+          <View style={styles.filaEntre}>
+            <Text style={styles.tarjetaTitulo}>Tu constancia</Text>
+            <Ionicons name="leaf-outline" size={18} color={colors.inactive} />
+          </View>
+          {sesiones.length === 0 ? (
+            <Text style={styles.tarjetaTexto}>
+              Aún no hay sesiones guardadas. Cuando termines una, aparecerá aquí.
+            </Text>
+          ) : (
+            <Text style={styles.tarjetaTexto}>
+              {sesiones.length === 1
+                ? '1 sesión guardada'
+                : `${sesiones.length} sesiones guardadas`}{' '}
+              · última: {formatearFecha(sesiones[0].finalizadaEn)}
+            </Text>
+          )}
         </View>
 
         <Text style={styles.pie}>
