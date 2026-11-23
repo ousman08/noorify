@@ -18,7 +18,7 @@ export default function PantallaEnConstruccion({ titulo, subtitulo, puntos }: Pr
   return (
     <SafeAreaView style={styles.pantalla} edges={['top']}>
       <ScrollView contentContainerStyle={styles.contenido} showsVerticalScrollIndicator={false}>
-        <Text style={styles.overline}>NOORIFY</Text>
+        <Text style={styles.overline}>ASAS</Text>
         <Text style={styles.titulo}>{titulo}</Text>
         <Text style={styles.subtitulo}>{subtitulo}</Text>
 
