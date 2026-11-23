@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { AppState, BackHandler, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -80,7 +80,7 @@ export default function SesionDhikr() {
     setError(null);
   };
 
-  const guardarBorradorActual = async () => {
+  const guardarBorradorActual = useCallback(async () => {
     const momento = Date.now();
     const activoActual = acumuladoMs +
       (estado === 'activa' ? Math.max(0, momento - inicioTramo) : 0);
@@ -92,7 +92,7 @@ export default function SesionDhikr() {
       toques,
       updatedAtMs: momento,
     });
-  };
+  }, [acumuladoMs, estado, inicioTramo, iniciadaEn, toques]);
 
   // El cronómetro se apoya en marcas de tiempo reales, no en contar ticks.
   useEffect(() => {
@@ -108,14 +108,14 @@ export default function SesionDhikr() {
 
   const segundosActivos = Math.floor(activoMs / 1000);
   useEffect(() => {
-    if (!sesionLista || borradorPendiente !== null || guardada !== null) return;
+    if (!sesionLista || borradorPendiente !== null || guardada !== null || guardando) return;
     const temporizador = setTimeout(() => {
       void guardarBorradorActual().catch(() => {
         setError('No se pudo guardar el borrador en el teléfono.');
       });
     }, 1000);
     return () => clearTimeout(temporizador);
-  }, [sesionLista, borradorPendiente, guardada, estado, acumuladoMs, inicioTramo, iniciadaEn, toques]);
+  }, [sesionLista, borradorPendiente, guardada, guardando, estado, acumuladoMs, inicioTramo, iniciadaEn, toques, guardarBorradorActual]);
 
   useEffect(() => {
     if (!sesionLista || borradorPendiente !== null || guardada !== null) return;
@@ -131,7 +131,8 @@ export default function SesionDhikr() {
 
   useEffect(() => {
     const suscripcion = BackHandler.addEventListener('hardwareBackPress', () => {
-      if (!sesionLista || guardada !== null) return false;
+      if (guardada !== null) return false;
+      if (!sesionLista) return true;
       setConfirmarSalida(true);
       return true;
     });
@@ -195,9 +196,11 @@ export default function SesionDhikr() {
   };
 
   const salirSinGuardar = async () => {
+    setGuardando(true);
     const borrado = await borrarBorrador();
     if (!borrado) {
       setError('No se pudo descartar el borrador. La sesión permanece abierta.');
+      setGuardando(false);
       setConfirmarSalida(false);
       return;
     }
@@ -226,6 +229,7 @@ export default function SesionDhikr() {
         {!sesionLista ? (
           <View style={styles.cierre}>
             <Text style={styles.cierreTexto}>Preparando tu sesión…</Text>
+            {error !== null ? <Text style={styles.errorTexto}>{error}</Text> : null}
           </View>
         ) : guardada !== null ? (
           <View style={styles.cierre}>
@@ -240,6 +244,7 @@ export default function SesionDhikr() {
             <Text style={styles.cierreNota}>
               Se ha guardado solo en tu teléfono. Puedes verla en Progreso.
             </Text>
+            {error !== null ? <Text style={styles.errorTexto}>{error}</Text> : null}
 
             <Pressable
               accessibilityRole="button"
