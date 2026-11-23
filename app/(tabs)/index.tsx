@@ -54,7 +54,7 @@ export default function Inicio() {
     <SafeAreaView style={styles.pantalla} edges={['top']}>
       <ScrollView contentContainerStyle={styles.contenido} showsVerticalScrollIndicator={false}>
         <View style={styles.encabezado}>
-          <Text style={styles.overline}>NOORIFY</Text>
+          <Text style={styles.overline}>ASAS</Text>
           <Text style={styles.saludo}>Assalamu Alaikum</Text>
           <Text style={styles.subtitulo}>Empieza cuando quieras, sin presión.</Text>
         </View>

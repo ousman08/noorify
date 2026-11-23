@@ -1,4 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
+// Prefijo histórico: se conserva para no perder el progreso guardado localmente.
 const PROGRESS_KEY = 'noorify:progress:v1';
 function isStringArray(value: unknown): value is string[] {
   return Array.isArray(value) && value.every((item) => typeof item === 'string');

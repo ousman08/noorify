@@ -1,4 +1,4 @@
-# Guía de Noorify: curso Los Tres Principios
+# Guía de Asas: curso Los Tres Principios
 
 ## Probar la app en el móvil
 

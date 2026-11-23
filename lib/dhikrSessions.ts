@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
  * Todo se queda en el teléfono: no hay backend ni sincronización.
  */
 
+// Prefijo histórico: se conserva para no perder sesiones guardadas por versiones anteriores.
 export const CLAVE_SESIONES = 'noorify:dhikr:sessions:v1';
 
 const MAXIMO_SESIONES = 200;
@@ -120,6 +121,7 @@ export function formatearFecha(iso: string): string {
 
 
 /** Borrador temporal de una sesión todavía no finalizada. */
+// Prefijo histórico: se conserva para mantener compatibles los borradores existentes.
 export const CLAVE_BORRADOR = 'noorify:dhikr:draft:v1';
 const ANTIGUEDAD_MAXIMA_BORRADOR_MS = 24 * 60 * 60 * 1000;
 

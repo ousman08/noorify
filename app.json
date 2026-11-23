@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Noorify",
-    "slug": "noorify",
+    "name": "Asas",
+    "slug": "asas",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "noorify",
+    "scheme": "asas",
     "userInterfaceStyle": "light",
     "runtimeVersion": {
       "policy": "sdkVersion"

@@ -1,6 +1,6 @@
 # Fuentes del curso
 
-Esta carpeta contiene los textos base que se pueden utilizar para redactar las lecciones de Noorify.
+Esta carpeta contiene los textos base que se pueden utilizar para redactar las lecciones de Asas.
 
 ## Qué se puede añadir
 

@@ -1,4 +1,6 @@
-# Noorify
+# Asas
+
+Asas (أساس): base, cimiento.
 
 Aplicación móvil para acompañar el recuerdo de Allah (dhikr) en el día a día, con calma, constancia y sin presión.
 

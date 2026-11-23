@@ -56,7 +56,7 @@ export default function Progreso() {
   return (
     <SafeAreaView style={styles.pantalla} edges={['top']}>
       <ScrollView contentContainerStyle={styles.contenido} showsVerticalScrollIndicator={false}>
-        <Text style={styles.overline}>NOORIFY</Text>
+        <Text style={styles.overline}>ASAS</Text>
         <Text style={styles.titulo}>Progreso</Text>
         <Text style={styles.subtitulo}>Tu constancia, sin comparaciones.</Text>
 

@@ -1,5 +1,5 @@
 /**
- * Paleta y medidas de Noorify.
+ * Paleta y medidas de Asas.
  * Tonos verdes suaves y crema, pensados para una lectura tranquila.
  */
 export const colors = {

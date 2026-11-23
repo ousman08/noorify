@@ -8,7 +8,7 @@ export default function NotFoundScreen() {
     <>
       <Stack.Screen options={{ title: 'Pantalla no encontrada' }} />
       <View style={styles.pantalla}>
-        <Text style={styles.overline}>NOORIFY</Text>
+        <Text style={styles.overline}>ASAS</Text>
         <Text style={styles.titulo}>Esta pantalla no existe</Text>
         <Text style={styles.texto}>
           Puede que el enlace esté mal escrito o que la sección ya no esté disponible.
