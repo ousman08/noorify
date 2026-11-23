@@ -88,7 +88,7 @@ export default function SesionDhikr() {
       version: 1,
       startedAtMs: iniciadaEn,
       activeMs: activoActual,
-      activeSinceMs: estado === 'activa' ? inicioTramo : null,
+      activeSinceMs: estado === 'activa' ? momento : null,
       toques,
       updatedAtMs: momento,
     });
