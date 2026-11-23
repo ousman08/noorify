@@ -136,6 +136,22 @@ export default function Inicio() {
           </Pressable>
         </View>
 
+        {/* Curso */}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel="Abrir el curso Los Tres Principios"
+          onPress={() => router.push('/curso' as Href)}
+          style={({ pressed }) => [styles.cursoCard, pressed && styles.pulsado]}>
+          <View style={styles.cursoIcono}>
+            <Ionicons name="book-outline" size={21} color={colors.primary} />
+          </View>
+          <View style={styles.textoFlexible}>
+            <Text style={styles.tarjetaTitulo}>Aprender · Los Tres Principios</Text>
+            <Text style={styles.tarjetaTexto}>Un recorrido de aprendizaje, paso a paso.</Text>
+          </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.inactive} />
+        </Pressable>
+
         {/* Reflexión de Salah */}
         <View style={styles.tarjeta}>
           <View style={styles.filaEntre}>
@@ -400,6 +416,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
     textAlign: 'center',
+  },
+  cursoCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.md,
+    padding: spacing.lg,
+    borderRadius: radius.card,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.surface,
+  },
+  cursoIcono: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: colors.primarySoft,
   },
   tarjeta: {
     backgroundColor: colors.surface,
