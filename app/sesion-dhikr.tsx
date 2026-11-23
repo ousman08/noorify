@@ -129,14 +129,14 @@ export default function SesionDhikr() {
   ]);
 
   useEffect(() => {
-    if (!sesionLista || borradorPendiente !== null || guardada !== null || guardando) return;
+    if (!sesionLista || borradorPendiente !== null || guardada !== null || guardando || estado !== 'activa') return;
     const intervalo = setInterval(() => {
       void guardarBorradorActual().catch(() => {
         setError('No se pudo guardar el borrador en el teléfono.');
       });
     }, 1000);
     return () => clearInterval(intervalo);
-  }, [sesionLista, borradorPendiente, guardada, guardando, guardarBorradorActual]);
+  }, [sesionLista, borradorPendiente, guardada, guardando, estado, guardarBorradorActual]);
 
   useEffect(() => {
     if (!sesionLista || borradorPendiente !== null || guardada !== null || guardando) return;
