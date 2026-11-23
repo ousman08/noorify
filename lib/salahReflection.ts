@@ -6,7 +6,9 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
  * Por eso solo guardamos estados y fechas, nunca texto libre.
  */
 
+// Prefijo histórico: se conserva para mantener las reflexiones guardadas.
 export const CLAVE_REFLEXIONES = 'noorify:salah:reflections:v1';
+// Prefijo histórico: se conserva para mantener la preferencia guardada.
 export const CLAVE_PREFERENCIA = 'noorify:salah:enabled:v1';
 
 const MAXIMO_DIAS = 400;
