@@ -1,6 +1,6 @@
 # Prompt para OpenCode
 
-Lee primero `AGENTS.md` y respeta la arquitectura actual de Noorify.
+Lee primero `AGENTS.md` y respeta la arquitectura actual de Asas.
 
 ## Objetivo
 
