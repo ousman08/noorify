@@ -8,9 +8,7 @@ import { colors } from '@/constants/theme';
 type IconName = ComponentProps<typeof Ionicons>['name'];
 
 function TabIcon({ name, color }: { name: IconName; color: ColorValue }) {
-  return (
-    <Ionicons name={name} size={24} color={typeof color === 'string' ? color : colors.primary} />
-  );
+  return <Ionicons name={name} size={24} color={typeof color === 'string' ? color : colors.primary} />;
 }
 
 export default function TabLayout() {
@@ -44,24 +42,6 @@ export default function TabLayout() {
           title: 'Progreso',
           tabBarIcon: ({ color, focused }) => (
             <TabIcon name={focused ? 'leaf' : 'leaf-outline'} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="comunidad"
-        options={{
-          title: 'Comunidad',
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon name={focused ? 'people' : 'people-outline'} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="sadaqah"
-        options={{
-          title: 'Sadaqah',
-          tabBarIcon: ({ color, focused }) => (
-            <TabIcon name={focused ? 'gift' : 'gift-outline'} color={color} />
           ),
         }}
       />
