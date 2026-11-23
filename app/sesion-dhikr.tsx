@@ -1,22 +1,26 @@
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { AppState, BackHandler, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import AvisoProvisional from '@/components/AvisoProvisional';
 import { colors, radius, spacing } from '@/constants/theme';
 import {
+  borrarBorrador,
+  cargarBorrador,
   formatearCronometro,
   formatearDuracion,
+  guardarBorrador,
   guardarSesion,
+  type BorradorDhikr,
   type SesionDhikr,
 } from '@/lib/dhikrSessions';
 
 type Estado = 'activa' | 'pausada';
 
 export default function SesionDhikr() {
-  const [iniciadaEn] = useState(() => Date.now());
+  const [iniciadaEn, setIniciadaEn] = useState(() => Date.now());
   const [estado, setEstado] = useState<Estado>('activa');
   const [acumuladoMs, setAcumuladoMs] = useState(0);
   const [inicioTramo, setInicioTramo] = useState(() => Date.now());
@@ -28,14 +32,74 @@ export default function SesionDhikr() {
   const [guardando, setGuardando] = useState(false);
   const [guardada, setGuardada] = useState<SesionDhikr | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [sesionLista, setSesionLista] = useState(false);
+  const [borradorPendiente, setBorradorPendiente] = useState<BorradorDhikr | null>(null);
+
+  useEffect(() => {
+    let montado = true;
+    cargarBorrador()
+      .then((borrador) => {
+        if (!montado) return;
+        if (borrador) setBorradorPendiente(borrador);
+        else setSesionLista(true);
+      })
+      .catch(() => {
+        if (montado) setSesionLista(true);
+      });
+    return () => { montado = false; };
+  }, []);
+
+  const continuarBorrador = () => {
+    if (!borradorPendiente) return;
+    const momento = Date.now();
+    setIniciadaEn(borradorPendiente.startedAtMs);
+    setAcumuladoMs(borradorPendiente.activeMs);
+    setToques(borradorPendiente.toques);
+    setEstado(borradorPendiente.activeSinceMs === null ? 'pausada' : 'activa');
+    setInicioTramo(borradorPendiente.activeSinceMs ?? momento);
+    setAhora(momento);
+    setBorradorPendiente(null);
+    setSesionLista(true);
+  };
+
+  const empezarDeCero = async () => {
+    const borrado = await borrarBorrador();
+    if (!borrado) {
+      setError('No se pudo borrar el borrador anterior. Inténtalo otra vez.');
+      return;
+    }
+    const momento = Date.now();
+    setIniciadaEn(momento);
+    setEstado('activa');
+    setAcumuladoMs(0);
+    setInicioTramo(momento);
+    setAhora(momento);
+    setToques(0);
+    setBorradorPendiente(null);
+    setSesionLista(true);
+    setError(null);
+  };
+
+  const guardarBorradorActual = async () => {
+    const momento = Date.now();
+    const activoActual = acumuladoMs +
+      (estado === 'activa' ? Math.max(0, momento - inicioTramo) : 0);
+    await guardarBorrador({
+      version: 1,
+      startedAtMs: iniciadaEn,
+      activeMs: activoActual,
+      activeSinceMs: estado === 'activa' ? inicioTramo : null,
+      toques,
+      updatedAtMs: momento,
+    });
+  };
 
   // El cronómetro se apoya en marcas de tiempo reales, no en contar ticks.
   useEffect(() => {
-    if (estado !== 'activa' || guardada !== null) return;
-
+    if (!sesionLista || estado !== 'activa' || guardada !== null) return;
     const intervalo = setInterval(() => setAhora(Date.now()), 250);
     return () => clearInterval(intervalo);
-  }, [estado, guardada]);
+  }, [estado, guardada, sesionLista]);
 
   const activoMs =
     guardada !== null
@@ -43,6 +107,37 @@ export default function SesionDhikr() {
       : acumuladoMs + (estado === 'activa' ? Math.max(0, ahora - inicioTramo) : 0);
 
   const segundosActivos = Math.floor(activoMs / 1000);
+  useEffect(() => {
+    if (!sesionLista || borradorPendiente !== null || guardada !== null) return;
+    const temporizador = setTimeout(() => {
+      void guardarBorradorActual().catch(() => {
+        setError('No se pudo guardar el borrador en el teléfono.');
+      });
+    }, 1000);
+    return () => clearTimeout(temporizador);
+  }, [sesionLista, borradorPendiente, guardada, estado, acumuladoMs, inicioTramo, iniciadaEn, toques]);
+
+  useEffect(() => {
+    if (!sesionLista || borradorPendiente !== null || guardada !== null) return;
+    const suscripcion = AppState.addEventListener('change', (siguienteEstado) => {
+      if (siguienteEstado === 'background' || siguienteEstado === 'inactive') {
+        void guardarBorradorActual().catch(() => {
+          setError('No se pudo guardar el borrador en el teléfono.');
+        });
+      }
+    });
+    return () => suscripcion.remove();
+  }, [sesionLista, borradorPendiente, guardada, estado, acumuladoMs, inicioTramo, iniciadaEn, toques]);
+
+  useEffect(() => {
+    const suscripcion = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (!sesionLista || guardada !== null) return false;
+      setConfirmarSalida(true);
+      return true;
+    });
+    return () => suscripcion.remove();
+  }, [sesionLista, guardada]);
+
 
   const pausar = () => {
     const momento = Date.now();
@@ -79,6 +174,8 @@ export default function SesionDhikr() {
 
     try {
       await guardarSesion(sesion);
+      const borradorEliminado = await borrarBorrador();
+      if (!borradorEliminado) setError('La sesión se guardó, pero no se pudo borrar el borrador anterior.');
       setGuardada(sesion);
       setConfirmarFinal(false);
     } catch {
@@ -97,7 +194,13 @@ export default function SesionDhikr() {
     router.replace('/');
   };
 
-  const salirSinGuardar = () => {
+  const salirSinGuardar = async () => {
+    const borrado = await borrarBorrador();
+    if (!borrado) {
+      setError('No se pudo descartar el borrador. La sesión permanece abierta.');
+      setConfirmarSalida(false);
+      return;
+    }
     setConfirmarSalida(false);
     cerrarPantalla();
   };
@@ -120,7 +223,11 @@ export default function SesionDhikr() {
       <ScrollView
         contentContainerStyle={styles.contenido}
         showsVerticalScrollIndicator={false}>
-        {guardada !== null ? (
+        {!sesionLista ? (
+          <View style={styles.cierre}>
+            <Text style={styles.cierreTexto}>Preparando tu sesión…</Text>
+          </View>
+        ) : guardada !== null ? (
           <View style={styles.cierre}>
             <View style={styles.cierreIcono}>
               <Ionicons name="checkmark" size={34} color={colors.primary} />
@@ -216,6 +323,17 @@ export default function SesionDhikr() {
           </>
         )}
       </ScrollView>
+
+      <AvisoProvisional
+        visible={borradorPendiente !== null}
+        enLinea
+        onClose={() => {}}
+        titulo="Hay una sesión sin terminar"
+        mensaje="Puedes continuar donde lo dejaste o empezar una sesión nueva."
+        etiquetaPrincipal="Continuar sesión"
+        onPrincipal={continuarBorrador}
+        accionSecundaria={{ etiqueta: 'Empezar de cero', onPress: () => void empezarDeCero() }}
+      />
 
       <AvisoProvisional
         visible={confirmarFinal}
