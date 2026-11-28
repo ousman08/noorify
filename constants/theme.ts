@@ -40,3 +40,23 @@ export const spacing = {
   xl: 24,
   xxl: 32,
 } as const;
+
+
+/** Variante oscura utilizada por las pantallas del curso. */
+export const darkColors = {
+  background: '#101914',
+  surface: '#17231C',
+  surfaceAlt: '#1E2D24',
+  primary: '#A8D2B5',
+  primaryDark: '#85B997',
+  primarySoft: '#294333',
+  inactive: '#84978B',
+  text: '#F0F5F1',
+  textMuted: '#B0BFB5',
+  border: '#304238',
+  borderStrong: '#496152',
+  example: '#D5B77D',
+  exampleBg: '#342D20',
+  error: '#E2A49B',
+  errorBg: '#3A2524',
+} as const;

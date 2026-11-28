@@ -53,3 +53,15 @@ Use EAS to build, sign, and submit the app in the cloud (`eas build`, `eas submi
 - If `ios/` and `android/` directories do not exist, they are generated (Continuous Native Generation). Never create or edit them by hand: configure native behavior in `app.json` and config plugins.
 - Expo Go only includes its bundled native modules. After adding a library with native code, the app needs a development build: `pnpm expo run:ios|android` locally, or `eas build --profile development`.
 - Prefer recommended Expo modules over third-party libraries, and check available skills before adding dependencies. Docs: https://docs.expo.dev/versions/latest/index.md
+
+## Contenido de lecciones
+
+- Redacta lecciones únicamente a partir de fuentes incluidas en `docs/fuentes/`; comprueba su licencia antes de usarlas.
+- No escribas contenido religioso de memoria ni inventes aleyas, hadices, textos árabes, atribuciones, referencias o explicaciones.
+- Si no hay fuentes suficientes, utiliza `TODO: contenido pendiente de revisión` en los textos.
+- Cada lección debe incluir referencias exactas en `sources` y comprobaciones pendientes en `reviewNotes`.
+- Si el árabe no puede verificarse en una fuente, utiliza `arabic: { text: "TODO", ref: "TODO", verified: false }`.
+- Usa español sencillo y frases cortas. Cada elemento de `body` tendrá un máximo de 120 palabras.
+- Toda lección nueva empieza con `status: "draft"`. Nunca cambies a `reviewed` sin aprobación explícita de una persona con conocimiento.
+- No incluyas opiniones propias ni juicios sobre otros musulmanes o grupos.
+- Si `docs/fuentes/` está vacía, no completes el contenido de memoria: deja los marcadores TODO.
