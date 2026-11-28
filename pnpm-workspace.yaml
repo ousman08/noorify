@@ -2,7 +2,9 @@
 # eas-cli trae dos dependencias con scripts de instalación que no necesitamos:
 # - dtrace-provider: solo compila soporte DTrace en macOS/illumos.
 # - protobufjs: su script únicamente imprime un aviso.
+# - @parcel/watcher: watcher nativo que Jest no necesita.
 # Al declararlas como "false" evitamos que pnpm aborte la instalación.
 allowBuilds:
+  '@parcel/watcher': false
   dtrace-provider: false
   protobufjs: false
